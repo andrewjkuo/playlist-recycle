@@ -1,23 +1,45 @@
-import logo from './logo.svg';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+} from 'react-router-dom'
+import { useState } from 'react'
 import './App.css';
+import Home from './pages/Home'
+import Editor from './pages/Editor'
+
+const padding = {
+  padding: 5
+}
 
 function App() {
+  const [playlistIds, setPlaylistIds] = useState([])
+  const [code, setCode] = useState()
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app_container">
+      <div className="main_app">
+        <Router>
+          <div>
+            <Link style={padding} to="/">home</Link>
+            <Link style={padding} to="/editor">editor</Link>
+          </div>
+          <Routes>
+            <Route path="/" element={<Home
+              setPlaylistIds={setPlaylistIds}
+              code={code}
+              setCode={setCode}
+              className="page"
+            />} />
+            <Route path="/editor" element={<Editor
+              playlistIds={playlistIds}
+              code={code}
+              className="page"
+            />} />
+          </Routes>
+        </Router>
+      </div>
     </div>
   );
 }

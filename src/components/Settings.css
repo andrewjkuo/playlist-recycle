@@ -1,0 +1,156 @@
+.select_box {
+    margin-bottom: 25px;
+}
+
+#settings {
+    padding: 10px;
+    border-style:solid;
+    border-width: 2px;
+    border-color:#1DB954;
+    border-radius: 8px;
+    background-color: #FAFAFA;
+    box-shadow: 3px 3px 8px #CCCCCC;
+}
+
+#checkbox_group {
+    overflow: auto;
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+#explicit_checkbox {
+    width: 49%;
+    float: left;
+}
+
+#similar_checkbox {
+    width: 49%;
+    float: right;
+}
+
+#slider_group {
+    height: 100px;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+#year_slider {
+    width: 49%;
+    float: left;
+    position: relative;
+}
+
+#similar_slider {
+    width: 49%;
+    float: right;
+    position: relative;
+}
+
+.slider_title {
+    margin-bottom: -10px;
+}
+
+.widget_title {
+    font-size: 0.8em;
+}
+
+.checkbox {
+    font-size: 0.8em;
+}
+
+.slider_container {
+    display: flex;
+    height: 60px;
+    padding-left: 5px;
+    padding-right: 5px;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider {
+    position: relative;
+    width: 98%;
+}
+
+.slider__track,
+.slider__range,
+.slider__left-value,
+.slider__right-value {
+    position: absolute;
+}
+
+.slider__track,
+.slider__range {
+    border-radius: 3px;
+    height: 5px;
+}
+
+.slider__track {
+    background-color: #ced4da;
+    width: 100%;
+    z-index: 1;
+}
+
+.slider__range {
+    background-color: #1DB954;
+    z-index: 2;
+}
+
+.slider__left-value,
+.slider__right-value {
+    /* color: #dee2e6; */
+    font-size: 12px;
+    margin-top: 20px;
+}
+
+.slider__left-value {
+    left: 0px;
+}
+
+.slider__right-value {
+    right: 0px;
+}
+
+/* Removing the default appearance */
+.thumb,
+.thumb::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.thumb {
+    pointer-events: none;
+    position: absolute;
+    height: 0;
+    width: 98%;
+    outline: none;
+    z-index: 3;
+}
+
+/* For Chrome browsers */
+.thumb::-webkit-slider-thumb {
+    background-color: #f1f5f7;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px #ced4da;
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    margin-top: 4px;
+    pointer-events: all;
+    position: relative;
+}
+
+/* For Firefox browsers */
+.thumb::-moz-range-thumb {
+    background-color: #f1f5f7;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 1px 1px #ced4da;
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    margin-top: 4px;
+    pointer-events: all;
+    position: relative;
+}

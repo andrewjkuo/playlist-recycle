@@ -1,38 +1,127 @@
-.App {
-  text-align: center;
+.main_app {
+  margin-top: 10px;
+  margin-bottom: 30px;
+  margin-left: 30px;
+  margin-right: 30px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.page {
+  max-width: 1000px;
+  margin: auto;
+  background-color: #FFFFFF;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.profile {
+  height: 74px;
+  margin-bottom: 10px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+#prof_img_holder {
+  float: left;
 }
 
-.App-link {
-  color: #61dafb;
+#prof_text_holder {
+  padding-top: 25px;
+  padding-left: 20px;
+  float: left;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.profile_img {
+  height: 70px;
+  border-radius: 10px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #1DB954;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8em;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 7px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1em;
+  padding: 10px;
+  margin: 10px 0px;
+}
+
+.summ_container {
+  overflow: auto;
+}
+
+#playlist_container {
+  max-height: 400px;
+  margin-bottom: 20px;
+  overflow-y: auto;
+}
+
+#summ1 {
+  width: 50%;
+  float: left;
+}
+#summ2 {
+  width: 50%;
+  float: right;
+}
+
+.output_container {
+    padding: 10px;
+    border-style:solid;
+    border-width: 2px;
+    border-color:#1DB954;
+    border-radius: 8px;
+    background-color: #FAFAFA;
+    box-shadow: 3px 3px 8px #CCCCCC;
+}
+
+.text_container {
+  overflow: auto;
+  padding-bottom: 20px;
+}
+
+.text {
+  min-height: 38px;
+  border-color: hsl(0deg 0% 80%);
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  font-family: inherit;
+  font-size: 1em;
+  padding: 8px 8px;
+}
+
+.title_text {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.desc_text {
+  width: 100%;
+  max-width: 100%;
+  min-width: 100%;
+  box-sizing: border-box;
+}
+
+.out_title {
+  font-size: 0.8em;
+}
+
+#out1 {
+  width: 100%;
+}
+
+#out2 {
+  width: 100%;
 }
