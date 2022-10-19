@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, useRef } from "react"
 
-const RangeSlider = ({ min, max, onChange }) => {
+const RangeSlider = ({ min, max, setMinKeepYear, setMaxKeepYear }) => {
   const [minVal, setMinVal] = useState(min)
   const [maxVal, setMaxVal] = useState(max)
   const minValRef = useRef(min)
@@ -34,11 +34,6 @@ const RangeSlider = ({ min, max, onChange }) => {
     }
   }, [maxVal, getPercent])
 
-  // Get min and max values when their state changes
-  useEffect(() => {
-    onChange(min=minVal, max=maxVal)
-  }, [minVal, maxVal, onChange])
-
   return (
     <div className="slider_container">
       <input
@@ -50,6 +45,7 @@ const RangeSlider = ({ min, max, onChange }) => {
           const value = Math.min(Number(event.target.value), maxVal - 1)
           setMinVal(value)
           minValRef.current = value
+          setMinKeepYear(value)
         }}
         className="thumb thumb--left"
         style={{ zIndex: minVal > max - 100 && "5" }}
@@ -63,6 +59,7 @@ const RangeSlider = ({ min, max, onChange }) => {
           const value = Math.max(Number(event.target.value), minVal + 1)
           setMaxVal(value)
           maxValRef.current = value;
+          setMaxKeepYear(value)
         }}
         className="thumb thumb--right"
       />
@@ -77,14 +74,16 @@ const RangeSlider = ({ min, max, onChange }) => {
   );
 };
 
-const Slider = ({ min, max, value, scale=1, onChange }) => {
+const Slider = ({ min, max, value, scale=1, numLabels=true, setSimAgg}) => {
   const [val, setVal] = useState(value / scale)
   const valRef = useRef(value / scale)
 
-  // Get min and max values when their state changes
-  useEffect(() => {
-    onChange(value=val * scale);
-  }, [val, onChange]);
+  var minLabel = min
+  var maxLabel = max
+  if (!numLabels) { 
+    minLabel = 'Min'
+    maxLabel = 'Max'
+  }
 
   return (
     <div className="slider_container">
@@ -94,15 +93,17 @@ const Slider = ({ min, max, value, scale=1, onChange }) => {
         max={max / scale}
         value={val}
         onChange={(event) => {
-          setVal(event.target.value)
-          valRef.current = event.target.value
+          const value = event.target.value
+          setVal(value)
+          valRef.current = value
+          setSimAgg(value * scale)
         }}
         className="thumb"
       />
       <div className="slider">
         <div className="slider__track" />
-        <div className="slider__left-value">{min}</div>
-        <div className="slider__right-value">{max}</div>
+        <div className="slider__left-value">{minLabel}</div>
+        <div className="slider__right-value">{maxLabel}</div>
       </div>
     </div>
   );

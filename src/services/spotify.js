@@ -39,20 +39,24 @@ async function fetchPlaylist(spotifyApi, playlistId, page=0, prevResponse=[]) {
   const request = spotifyApi.getPlaylistTracks(playlistId, {
     offset: 100*page
   })
-  return request.then((data => {
+  return request
+  .then(data => {
     const response = [...prevResponse, ...procTracks(data)]
     if (data.body.next) {
       return fetchPlaylist(spotifyApi, playlistId, page+1, response)
     }
     return response
-  }))
+  })
+  .catch(err => window.location.replace('/'))
 }
 
 async function fetchGenres(spotifyApi, artistIds) {
   const request = spotifyApi.getArtists(artistIds)
-  return request.then((data => {
+  return request
+  .then(data => {
     return procGenres(data.body.artists)
-  }))
+  })
+  .catch(err => window.location.replace('/'))
 }
 
 async function getProfile(accessToken) {
@@ -60,7 +64,9 @@ async function getProfile(accessToken) {
     accessToken: accessToken
   })
   const request = spotifyApi.getMe()
-  return request.then(data => data.body)
+  return request
+    .then(data => data.body)
+    .catch(err => window.location.replace('/'))
 }
 
 const getPlaylists = (accessToken, setPlaylists) => {
@@ -68,12 +74,14 @@ const getPlaylists = (accessToken, setPlaylists) => {
     accessToken: accessToken
   })
   const request = spotifyApi.getUserPlaylists()
-  request.then((data => {
-    const outData = data.body.items.map(playlist => ( 
-      { ...playlist, include: false}
-    ))
-    setPlaylists(outData)
-  }))
+  request
+    .then(data => {
+      const outData = data.body.items.map(playlist => ( 
+        { ...playlist, include: false}
+      ))
+      setPlaylists(outData)
+    })
+    .catch(err => window.location.replace('/'))
 }
 
 const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) => {
@@ -85,7 +93,8 @@ const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) =
     allPlayPromises.push(fetchPlaylist(spotifyApi, playlistIds[i], 0, []))
   }
 
-  Promise.all(allPlayPromises).then((values) => {
+  Promise.all(allPlayPromises)
+  .then((values) => {
     const tracksNoDup = values.flat().filter((value, index, self) => 
       self.findIndex(t => t.id === value.id) === index
     )
@@ -100,7 +109,8 @@ const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) =
     for (let i = 0; i < maxPage; i++) {
       allGenPromises.push(fetchGenres(spotifyApi, artistsNoDup.map(itm => (itm.id)).slice(i*50, (i+1)*50)))
     }
-    Promise.all(allGenPromises).then((values) => {
+    Promise.all(allGenPromises)
+    .then((values) => {
       const flatGenres = values.flat()
       setGenres(
         flatGenres.map(data => {
@@ -113,17 +123,21 @@ const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) =
         }).filter(data => data.genre_count > 1)
       )
     })
+    .catch(err => window.location.replace('/'))
+
   })
+  .catch(err => window.location.replace('/'))
 }
 
-const createPlaylist = (accessToken, trackIds, plName, plDesc, isPublic=true) => {
+const createPlaylist = (accessToken, trackIds, plName, plDesc, isPublic=true, setShowModal) => {
   var spotifyApi = new SpotifyWebApi({
     accessToken: accessToken
   })
   spotifyApi.createPlaylist(
     plName,
     {description: plDesc, public: isPublic}
-  ).then(data => {
+  )
+  .then(data => {
     const playlistId = data.body.uri.split(':')[2]
     const allGenPromises = []
     const maxPage = Math.floor((trackIds.length - 1) / 100) + 1
@@ -133,8 +147,13 @@ const createPlaylist = (accessToken, trackIds, plName, plDesc, isPublic=true) =>
         trackIds.slice(i*100, (i+1)*100).map(itm => 'spotify:track:'+itm)
       ))
     }
-    Promise.all(allGenPromises).then((values) => {})
+    Promise.all(allGenPromises)
+    .then((values) => {setShowModal(true)})
+    .catch(err => window.location.replace('/'))
   })
+  .catch(err => window.location.replace('/'))
+  setShowModal(true)
+
 }
 
 export { getProfile, getPlaylists, getTracks, createPlaylist }

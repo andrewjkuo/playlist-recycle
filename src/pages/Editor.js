@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getTracks, createPlaylist } from '../services/spotify'
 import Settings from '../components/Settings'
 import Profile from '../components/Profile'
+import Modal from '../components/Modal'
 
 const Editor = ({ playlistIds, code }) => {
   const [tracks, setTracks] = useState([])
@@ -10,28 +11,51 @@ const Editor = ({ playlistIds, code }) => {
   const [outPlay, setOutPlay] = useState([])
   const [plTitle, setPlTitle] = useState('')
   const [plDesc, setPlDesc] = useState('')
+  const [showModal, setShowModal] = useState(false)
+
+  const resetPl = () => {
+    setShowModal(false)
+    setPlTitle('')
+    setPlDesc('')
+  }
+
+  const beforeunload = (e) => {
+    e.preventDefault()
+    e.returnValue = true
+  }
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', beforeunload)
+    return () => {
+      window.removeEventListener('beforeunload', beforeunload)
+    }
+  })
+
   useEffect(() => {
     getTracks(code, playlistIds, setTracks, setArtists, setGenres)
   },[code,playlistIds])
+
   return (
     <div className="page">
-      <h2>Editor</h2>
+      <h1>Editor</h1>
       <Profile code={code} />
+      <Modal showModal={showModal} resetPl={resetPl}/>
+      {genres.length === 0 &&
+      <div>
+        <div className="loading_container">
+            <img className="loading" src="spotify_loading.png" alt="loading logo"></img>
+        </div>
+        <p className="loading_txt">Loading...</p>
+      </div>
+      }
       {genres.length > 0 && 
       <div>
         <div className="summ_container">
-          <div id="summ1">
-            <ul>
-              <li><b>Playlists: </b>{playlistIds.length}</li>
-              <li><b>Tracks: </b>{tracks.length}</li>
-            </ul>
-          </div>
-          <div id="summ2">
-            <ul>
-              <li><b>Artists: </b>{artists.length}</li>
-              <li><b>Genres: </b>{genres.length}</li>
-            </ul>
-          </div>
+          <p>
+            Successfully imported <b>{tracks.length}</b> tracks
+            by <b>{artists.length}</b> artists
+            from <b>{playlistIds.length}</b> playlists.
+          </p>
         </div>
         <Settings
           tracks={tracks}
@@ -44,7 +68,7 @@ const Editor = ({ playlistIds, code }) => {
       {outPlay.length > 0 &&
         <div>
           <h2>{"New Playlist - " + outPlay.length + " Tracks"}</h2>
-          <div id="playlist_container">
+          <div id="tracks_container">
             <table>
               <thead>
                 <tr>
@@ -78,7 +102,12 @@ const Editor = ({ playlistIds, code }) => {
                 <textarea value={plDesc} onInput={e => setPlDesc(e.target.value)} placeholder="Enter Description..." className="text desc_text"></textarea>
               </div>
             </div>
-            <button onClick={() => createPlaylist(code, outPlay.map(itm => itm.id), plTitle, plDesc)}>Create Playlist</button>
+            <button
+              onClick={() => createPlaylist(code, outPlay.map(itm => itm.id), plTitle, plDesc, true,  setShowModal)}
+              disabled={plTitle.length === 0}
+            >
+              Create Playlist
+            </button>
           </div>
         </div>
       }

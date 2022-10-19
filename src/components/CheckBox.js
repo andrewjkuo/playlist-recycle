@@ -11,7 +11,12 @@ const CheckBox = ({checked, setChecked, label}) => {
             checked={checked}
             onChange={handleChange}
             />
-            {label}
+            <div className="tooltip tooltip_l">
+                <p>{label}</p>
+                <span className="tooltiptext tooltiptext_l">
+                    If unchecked, explicit tracks will be excluded.
+                </span>
+            </div>
         </label>
         </div>
     );

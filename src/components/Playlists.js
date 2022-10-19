@@ -19,17 +19,20 @@ const Playlists = ({ code, setPlaylistIds }) => {
     setPlaylistIds(outPlaylistIds)
     navigate('/editor')
   }
-  
-  // getPlaylists(code, setPlaylists)
 
   if (playlists.length > 0) {
     return (
       <div>
-        <div>
+        <p>
+          Select all of the playlists that you would like to recycle.
+        </p>
+        <button onClick={() => setPlaylists(playlists.map(p => ({...p, ...{include: true}})))}>Select All</button>
+        <button onClick={() => setPlaylists(playlists.map(p => ({...p, ...{include: false}})))} id="deselect-btn">Deselect All</button>
+        <div className="playlist_container">
           <table>
             <thead>
               <tr>
-                <th>Include</th>
+                <th></th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Tracks</th>
@@ -53,8 +56,13 @@ const Playlists = ({ code, setPlaylistIds }) => {
               )}
             </tbody>
           </table>
-          <button onClick={showIncluded}>Import Tracks</button>
         </div>
+        <button
+          onClick={showIncluded}
+          disabled={playlists.filter(playlist => playlist.include).length === 0}
+        >
+          Import Tracks
+        </button>
       </div>
     )
   } else {

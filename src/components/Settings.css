@@ -1,31 +1,21 @@
 .select_box {
-    margin-bottom: 25px;
+    margin-bottom: 15px;
+    margin-top: 15px;
 }
 
 #settings {
     padding: 10px;
-    border-style:solid;
+    border-style: solid;
     border-width: 2px;
-    border-color:#1DB954;
+    border-color: #1ED760;
     border-radius: 8px;
-    background-color: #FAFAFA;
-    box-shadow: 3px 3px 8px #CCCCCC;
+    background-color: #F7F7F7;
+    box-shadow: 2px 2px 8px #CCCCCC;
 }
 
 #checkbox_group {
-    overflow: auto;
     text-align: left;
     margin-bottom: 15px;
-}
-
-#explicit_checkbox {
-    width: 49%;
-    float: left;
-}
-
-#similar_checkbox {
-    width: 49%;
-    float: right;
 }
 
 #slider_group {
@@ -46,16 +36,14 @@
     position: relative;
 }
 
-.slider_title {
-    margin-bottom: -10px;
-}
-
 .widget_title {
     font-size: 0.8em;
+    margin-bottom: 0px;
 }
 
-.checkbox {
+.checkbox p {
     font-size: 0.8em;
+    margin-bottom: 0px;
 }
 
 .slider_container {
@@ -69,7 +57,7 @@
 
 .slider {
     position: relative;
-    width: 98%;
+    width: 100%;
 }
 
 .slider__track,
@@ -92,7 +80,7 @@
 }
 
 .slider__range {
-    background-color: #1DB954;
+    background-color: #1ED760;
     z-index: 2;
 }
 
@@ -122,7 +110,7 @@
     pointer-events: none;
     position: absolute;
     height: 0;
-    width: 98%;
+    width: 100%;
     outline: none;
     z-index: 3;
 }
@@ -153,4 +141,67 @@
     margin-top: 4px;
     pointer-events: all;
     position: relative;
+}
+
+/* Tooltip container */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 180px;
+    background-color: #ffffff;
+    color: black;
+    border-color: #1ED760;
+    border-style: solid;
+    border-width: 1px;
+    word-break: break-word;
+    text-align: left;
+    bottom: 100%;
+    opacity: 0.95;
+    padding: 5px 5px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    position: absolute;
+    z-index: 9;
+}
+
+.tooltip_l .tooltiptext_l {
+    left: 50%;
+    margin-left: -20px;
+}
+
+.tooltip_r .tooltiptext_r {
+    left: 50%;
+    margin-left: -90px;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%;
+    /* At the bottom of the tooltip */
+    margin-left: -5px;
+    margin-top: 1px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1ed760 transparent transparent transparent;
+}
+
+.tooltip_l .tooltiptext_l::after {
+    left: 20px;
+}
+
+.tooltip_r .tooltiptext_r::after {
+    left: 90px;
 }

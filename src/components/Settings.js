@@ -26,23 +26,20 @@ function compare( variable ) {
   }
 }
 
-const playlistGen = ({tracks, artists, genres, explicit, similar, minKeepYear, maxKeepYear, simAgg, keepArt, keepGen, setOutPlay}) => {
+const playlistGen = ({tracks, artists, genres, explicit, minKeepYear, maxKeepYear, simAgg, keepArt, keepGen, setOutPlay}) => {
   var outGen = [...keepGen]
-  if (similar) {
-    const thresh = Math.sqrt(artists.length) * simAgg
-    keepArt.forEach(artist => {
-      var artGens = genres.filter(itm => itm.id === artist)
-      var minGenre = 0
-      if (artGens.length > 0) {
-        minGenre = Math.min(...artGens.map(itm => itm.genre_count))
-      }
-      outGen.push(artGens.filter(itm => itm.genre_count <= Math.max(thresh,minGenre)).map(itm => itm.genre))
-    })
-    outGen = [...new Set(outGen.flat())]
-  }
+  const thresh = Math.sqrt(artists.length) * simAgg * simAgg
+  keepArt.forEach(artist => {
+    var artGens = genres.filter(itm => itm.id === artist)
+    outGen.push(artGens.filter(itm => itm.genre_count <= thresh).map(itm => itm.genre))
+  })
+  outGen = [...new Set(outGen.flat())]
   const outArt = [...new Set([...genres.filter(gen => outGen.includes(gen.genre)).map(itm => itm.id), ...keepArt])]
   const outTracks = tracks.filter(track => 
-    (track.artists.map(itm => itm.id).some(itm => outArt.includes(itm))) &&
+    (
+      (track.artists.map(itm => itm.id).some(itm => outArt.includes(itm))) ||
+      (keepArt.length + keepGen.length === 0)
+    ) &&
     (!track.explicit || explicit) &&
     (track.release_date >= minKeepYear) &&
     (track.release_date <= maxKeepYear)
@@ -57,12 +54,11 @@ const playlistGen = ({tracks, artists, genres, explicit, similar, minKeepYear, m
 
 const Settings = ({ tracks, artists, genres, setOutPlay }) => {
   const [explicit, setExplicit] = useState(true)
-  const [similar, setSimilar] = useState(true)
   const minYear = Math.min(...tracks.map(track => track.release_date))
   const maxYear = Math.max(...tracks.map(track => track.release_date))
   const [minKeepYear, setMinKeepYear] = useState(minYear)
   const [maxKeepYear, setMaxKeepYear] = useState(maxYear)
-  const [simAgg, setSimAgg] = useState(1.3)
+  const [simAgg, setSimAgg] = useState(1.1)
   const [keepArt, setKeepArt] = useState([])
   const [keepGen, setKeepGen] = useState([])
 
@@ -72,7 +68,7 @@ const Settings = ({ tracks, artists, genres, setOutPlay }) => {
 
   const genreOpts = genres
     .map(genre => ({
-      value: genre.genre, label: genre.genre
+      value: genre.genre, label: genre.genre+' ('+genre.genre_count+' artists)'
     }))
     .filter((value, index, self) => 
       self.findIndex(t => t.value === value.value) === index
@@ -84,59 +80,78 @@ const Settings = ({ tracks, artists, genres, setOutPlay }) => {
     <div id="settings">
       <h3>Playlist Parameters</h3>
       <div id="checkbox_group">
-        <div id="explicit_checkbox">
-          <CheckBox
-            checked={explicit}
-            setChecked={setExplicit}
-            label={'Include Explicit?'}
-          />
-        </div>
-        <div id="similar_checkbox">
-          <CheckBox
-            checked={similar}
-            setChecked={setSimilar}
-            label={'Include Similar Artists?'}
-          />
-        </div>
+        <CheckBox
+          checked={explicit}
+          setChecked={setExplicit}
+          label={'Include Explicit Tracks?'}
+        />
       </div>
       <div id='slider_group'>
         <div id="year_slider">
-          <p className="widget_title slider_title">Years</p>
+          <div className="tooltip tooltip_l">
+            <p className="widget_title slider_title">Release Years</p>
+            <span className="tooltiptext tooltiptext_l">
+              Choose a range of years (inclusive of min and max).
+              Only tracks released in this period will be included.
+            </span>
+          </div>
           <RangeSlider
             min={minYear}
             max={maxYear}
-            onChange={(min, max) => {
-              setMinKeepYear(min)
-              setMaxKeepYear(max)
-            }}
+            setMinKeepYear={setMinKeepYear}
+            setMaxKeepYear={setMaxKeepYear}
           />
         </div>
         <div id="similar_slider">
-          <p className="widget_title slider_title">Similarity</p>
+          <div className="tooltip tooltip_r">
+            <p className="widget_title slider_title">Similarity Threshold</p>
+            <span className="tooltiptext tooltiptext_r">
+              This parameter controls how aggressively the tool will search
+              for similar artists. If set to min then only the specific
+              artists chosen will be included. Experiment with different
+              values until you get a playlist you like.
+            </span>
+          </div>
           <Slider 
             min={0.0}
-            max={1.5}
+            max={2.0}
             value={simAgg}
             scale={0.1}
-            onChange={(value) => {setSimAgg(value)}}
+            numLabels={false}
+            setSimAgg={setSimAgg}
           />
         </div>
       </div>
-      <p className="widget_title">Artists</p>
+      <div className="tooltip tooltip_l">
+        <p className="widget_title">Artists</p>
+        <span className="tooltiptext tooltiptext_l">
+          Choose some artists that you want included.
+          The tool will populate your playlist with them
+          and artists in similar genres.
+        </span>
+      </div>
       <Select
         options={artistOpts}
         isMulti={true}
         onChange={data => {setKeepArt(data.map(itm => itm.value))}}
         className="select_box"
       />
-      <p className="widget_title">Genres</p>
+      <div className="tooltip tooltip_l">
+        <p className="widget_title">Genres</p>
+        <span className="tooltiptext tooltiptext_l">
+          It's usually best to leave this field blank. 
+          Spotify has over 5000 unique genres but if you
+          want to include a few specific ones you can
+          add them here.
+        </span>
+      </div>
       <Select
         options={genreOpts}
         isMulti={true}
         onChange={data => {setKeepGen(data.map(itm => itm.value))}}
         className="select_box"
       />
-      <button onClick={() => playlistGen({tracks, artists, genres, explicit, similar, minKeepYear, maxKeepYear, simAgg, keepArt, keepGen, setOutPlay})}>Generate Playlist</button>
+      <button onClick={() => playlistGen({tracks, artists, genres, explicit, minKeepYear, maxKeepYear, simAgg, keepArt, keepGen, setOutPlay})}>Generate Playlist</button>
     </div>
   )
 }
