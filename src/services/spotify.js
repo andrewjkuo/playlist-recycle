@@ -35,6 +35,19 @@ const procGenres = (data) => {
   )).flat()
 }
 
+async function fetchUserPlaylist(spotifyApi, page=0, prevResponse=[]) {
+  const request = spotifyApi.getUserPlaylists({offset: page*50, limit: 50})
+  return request
+  .then(data => {
+    const response = [...prevResponse, ...data.body.items]
+    if (data.body.next) {
+      return fetchUserPlaylist(spotifyApi, page+1, response)
+    }
+    return response
+  })
+  .catch(err => window.location.replace('/'))
+}
+
 async function fetchPlaylist(spotifyApi, playlistId, page=0, prevResponse=[]) {
   const request = spotifyApi.getPlaylistTracks(playlistId, {
     offset: 100*page
@@ -73,10 +86,9 @@ const getPlaylists = (accessToken, setPlaylists) => {
   var spotifyApi = new SpotifyWebApi({
     accessToken: accessToken
   })
-  const request = spotifyApi.getUserPlaylists()
-  request
+  fetchUserPlaylist(spotifyApi, 0, [])
     .then(data => {
-      const outData = data.body.items.map(playlist => ( 
+      const outData = data.map(playlist => ( 
         { ...playlist, include: false}
       ))
       setPlaylists(outData)
