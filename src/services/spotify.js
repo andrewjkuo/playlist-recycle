@@ -1,7 +1,7 @@
 import SpotifyWebApi from 'spotify-web-api-node'
 
 const procTracks = (data) => {
-  return data.body.items.filter(item => !item.is_local && item.track.name !== '').map(item => {
+  return data.body.items.filter(item => !item.is_local && item.track !== null && item.track.name !== '').map(item => {
     var d = new Date(item.track.album.release_date)
     return {
       id: item.track.id,
@@ -60,7 +60,9 @@ async function fetchPlaylist(spotifyApi, playlistId, page=0, prevResponse=[]) {
     }
     return response
   })
-  .catch(err => window.location.replace('/'))
+  .catch(err => {
+    window.location.replace('/')
+  })
 }
 
 async function fetchGenres(spotifyApi, artistIds) {
@@ -69,7 +71,9 @@ async function fetchGenres(spotifyApi, artistIds) {
   .then(data => {
     return procGenres(data.body.artists)
   })
-  .catch(err => window.location.replace('/'))
+  .catch(err => {
+    window.location.replace('/')
+  })
 }
 
 async function getProfile(accessToken) {
@@ -109,6 +113,8 @@ const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) =
   .then((values) => {
     const tracksNoDup = values.flat().filter((value, index, self) => 
       self.findIndex(t => t.id === value.id) === index
+    ).filter((value, index, self) =>
+      value.artists[0].type === 'artist'
     )
     const artistsNoDup = procArtists(tracksNoDup).filter((value, index, self) => 
       self.findIndex(t => t.id === value.id) === index

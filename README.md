@@ -72,3 +72,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 ### To Do:
 * ask for report errors
 * Rate Limits
+* option to make playlists private
+* remove songs directly in the app
+* bugfix: all local tracks
