@@ -1,4 +1,12 @@
-# Getting Started with Create React App
+# Spotify Playlist Recycling Plant
+
+Don't send your old playlists to landfill! The **Spotify Playlist Recycling Plant** is a sustainable solution that combs through your music library and generates new intelligent playlists based on a few user inputs.
+
+If you're anything like me, you've got thousands of songs floating around in a bunch of Spotify playlists with titles like "**~~GUD S0NGZ 2k18~~**". You know there are some forgotten gems in all that mess but it would take ages to find them...
+
+At the heart of this tool is a custom algorithm that uses Spotify's **5000+** unique genres to identify similar artists. E.g. If you want to listen to some tracks that sound like The Stooges and The Ramones, just plug in those artists, adjust a few settings and your playlist will be ready before you can say "The KKK Took My Baby Away".
+
+**Please Note**: This tool will only use tracks from your existing playlists and **DOES NOT** suggest new music. If this is functionality you are looking for, I would suggest using Spotify's recommendation algorithm. It's pretty good!
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -14,11 +22,6 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\
@@ -29,49 +32,9 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-### To Do:
-* ask for report errors
-* Rate Limits
-* option to make playlists private
-* remove songs directly in the app
-* bugfix: all local tracks
+## Future:
+* Bugfix: handle edge case where all tracks are local
+* Bugfix: handle edge case where only 1 track is imported
+* Spotify rate limit handling
+* Provide option to make output playlist private
+* Remove songs from the output playlist directly in the app
