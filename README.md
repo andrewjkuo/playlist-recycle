@@ -34,7 +34,6 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ## Future:
 * Bugfix: handle edge case where all tracks are local
-* Bugfix: handle edge case where only 1 track is imported
 * Spotify rate limit handling
 * Option to make output playlist private
 * Remove songs from the output playlist directly in the app

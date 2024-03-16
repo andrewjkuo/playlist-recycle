@@ -11,6 +11,7 @@ const Editor = ({ playlistIds, code }) => {
   const [outPlay, setOutPlay] = useState([])
   const [plTitle, setPlTitle] = useState('')
   const [plDesc, setPlDesc] = useState('')
+  // const [plPublic, setPlPublic] = useState(false)
   const [showModal, setShowModal] = useState(false)
 
   const resetPl = () => {
@@ -23,6 +24,8 @@ const Editor = ({ playlistIds, code }) => {
     e.preventDefault()
     e.returnValue = true
   }
+
+  // const handleCheck = () => setPlPublic(!plPublic)
 
   useEffect(() => {
     window.addEventListener('beforeunload', beforeunload)
@@ -40,7 +43,7 @@ const Editor = ({ playlistIds, code }) => {
       <h1>Editor</h1>
       <Profile code={code} />
       <Modal showModal={showModal} resetPl={resetPl}/>
-      {genres.length === 0 &&
+      {tracks.length === 0 &&
       <div>
         <div className="loading_container">
             <img className="loading" src="spotify_loading.png" alt="loading logo"></img>
@@ -48,7 +51,7 @@ const Editor = ({ playlistIds, code }) => {
         <p className="loading_txt">Loading...</p>
       </div>
       }
-      {genres.length > 0 && 
+      {tracks.length > 0 && 
       <div>
         <div className="summ_container">
           <p>
@@ -101,9 +104,13 @@ const Editor = ({ playlistIds, code }) => {
                 <p className="out_title">Description</p>
                 <textarea value={plDesc} onInput={e => setPlDesc(e.target.value)} placeholder="Enter Description..." className="text desc_text"></textarea>
               </div>
+              {/* <div id="out3">
+                <p className="out_title">Is Public?</p>
+                <input type="checkbox" value={plPublic} onClick={handleCheck}></input>
+              </div> */}
             </div>
             <button
-              onClick={() => createPlaylist(code, outPlay.map(itm => itm.id), plTitle, plDesc, true,  setShowModal)}
+              onClick={() => createPlaylist(code, outPlay.map(itm => itm.id), plTitle, plDesc, true, setShowModal)}
               disabled={plTitle.length === 0}
             >
               Create Playlist

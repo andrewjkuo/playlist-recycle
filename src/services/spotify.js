@@ -158,11 +158,11 @@ const createPlaylist = (accessToken, trackIds, plName, plDesc, isPublic=true, se
   .then(data => {
     const playlistId = data.body.uri.split(':')[2]
     const allGenPromises = []
-    const maxPage = Math.floor((trackIds.length - 1) / 100) + 1
+    const maxPage = Math.floor((trackIds.length - 1) / 50) + 1
     for (let i = 0; i < maxPage; i++) {
       allGenPromises.push(spotifyApi.addTracksToPlaylist(
         playlistId,
-        trackIds.slice(i*100, (i+1)*100).map(itm => 'spotify:track:'+itm)
+        trackIds.slice(i*50, (i+1)*50).map(itm => 'spotify:track:'+itm)
       ))
     }
     Promise.all(allGenPromises)
