@@ -1,7 +1,49 @@
 import SpotifyWebApi from 'spotify-web-api-node'
 
+const API_BASE_URL = 'https://api.spotify.com/v1'
+const RATE_LIMIT_RETRIES = 6
+
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+const spotifyFetch = async (accessToken, path, options={}) => {
+  const url = new URL(`${API_BASE_URL}${path}`)
+  Object.entries(options.query || {}).forEach(([key, value]) => {
+    url.searchParams.set(key, value)
+  })
+
+  for (let attempt = 0; attempt <= RATE_LIMIT_RETRIES; attempt++) {
+    const response = await fetch(url.toString(), {
+      method: options.method || 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined
+    })
+
+    if (response.status === 429 && attempt < RATE_LIMIT_RETRIES) {
+      const retryAfter = Number(response.headers.get('Retry-After') || 1)
+      await wait((retryAfter * 1000) + 250)
+      continue
+    }
+
+    if (!response.ok) {
+      const responseText = await response.text()
+      const error = new Error(responseText || `Spotify request failed with ${response.status}`)
+      error.status = response.status
+      throw error
+    }
+
+    if (response.status === 204) {
+      return null
+    }
+
+    return response.json()
+  }
+}
+
 const procTracks = (data) => {
-  return data.body.items.filter(item => !item.is_local && item.track !== null && item.track.name !== '').map(item => {
+  return data.items.filter(item => !item.is_local && item.track !== null && item.track.name !== '').map(item => {
     var d = new Date(item.track.album.release_date)
     return {
       id: item.track.id,
@@ -10,8 +52,7 @@ const procTracks = (data) => {
       album: item.track.album.name,
       release_date: d.getFullYear(),
       duration: item.track.duration_ms / 60000,
-      explicit: item.track.explicit,
-      popularity: item.track.popularity
+      explicit: item.track.explicit
     }
   }
   )
@@ -27,12 +68,22 @@ const procArtists = (data) => {
 
 const procGenres = (data) => {
   return data.map((artist) => (
-    artist.genres.map(genre => ({
+    (artist.genres || []).map(genre => ({
       id: artist.id,
       name: artist.name,
       genre: genre
     }))
   )).flat()
+}
+
+const mergeTracks = (tracks) => {
+  return Array.from(tracks.reduce((trackMap, track) => {
+    if (!trackMap.has(track.id)) {
+      trackMap.set(track.id, track)
+    }
+
+    return trackMap
+  }, new Map()).values())
 }
 
 async function fetchUserPlaylist(spotifyApi, page=0, prevResponse=[]) {
@@ -48,32 +99,58 @@ async function fetchUserPlaylist(spotifyApi, page=0, prevResponse=[]) {
   .catch(err => window.location.replace('/'))
 }
 
-async function fetchPlaylist(spotifyApi, playlistId, page=0, prevResponse=[]) {
-  const request = spotifyApi.getPlaylistTracks(playlistId, {
-    offset: 100*page
-  })
-  return request
-  .then(data => {
-    const response = [...prevResponse, ...procTracks(data)]
-    if (data.body.next) {
-      return fetchPlaylist(spotifyApi, playlistId, page+1, response)
+async function fetchPlaylistPage(accessToken, playlistId, offset, endpoint='items') {
+  return spotifyFetch(accessToken, `/playlists/${playlistId}/${endpoint}`, {
+    query: {
+      limit: '50',
+      offset: String(offset),
+      fields: 'items(is_local,track(id,name,artists(id,name,type),album(name,release_date),duration_ms,explicit)),next'
     }
-    return response
-  })
-  .catch(err => {
-    window.location.replace('/')
   })
 }
 
-async function fetchGenres(spotifyApi, artistIds) {
-  const request = spotifyApi.getArtists(artistIds)
-  return request
-  .then(data => {
-    return procGenres(data.body.artists)
-  })
-  .catch(err => {
-    window.location.replace('/')
-  })
+async function fetchPlaylist(accessToken, playlistId) {
+  let offset = 0
+  let response = []
+  let next = true
+  let endpoint = 'items'
+
+  while (next) {
+    let data
+    try {
+      data = await fetchPlaylistPage(accessToken, playlistId, offset, endpoint)
+    } catch (error) {
+      if (endpoint === 'items' && error.status === 403) {
+        endpoint = 'tracks'
+        data = await fetchPlaylistPage(accessToken, playlistId, offset, endpoint)
+      } else {
+        throw error
+      }
+    }
+    response = [...response, ...procTracks(data)]
+    next = Boolean(data.next)
+    offset += 50
+  }
+
+  return response
+}
+
+async function fetchArtistGenres(accessToken, artistId) {
+  return spotifyFetch(accessToken, `/artists/${artistId}`)
+    .then(data => procGenres([data]))
+    .catch(() => [])
+}
+
+async function fetchGenres(accessToken, artistIds) {
+  const genres = []
+  for (let i = 0; i < artistIds.length; i += 4) {
+    const chunk = artistIds.slice(i, i + 4)
+    const responses = await Promise.all(chunk.map(artistId => fetchArtistGenres(accessToken, artistId)))
+    genres.push(...responses.flat())
+    await wait(100)
+  }
+
+  return genres
 }
 
 async function getProfile(accessToken) {
@@ -101,19 +178,13 @@ const getPlaylists = (accessToken, setPlaylists) => {
 }
 
 const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) => {
-  var spotifyApi = new SpotifyWebApi({
-    accessToken: accessToken
-  })
-  const allPlayPromises = []
-  for (let i = 0; i < playlistIds.length; i++) {
-    allPlayPromises.push(fetchPlaylist(spotifyApi, playlistIds[i], 0, []))
-  }
+  const allPlayPromises = playlistIds.reduce((promise, playlistId) => (
+    promise.then(async (responses) => [...responses, await fetchPlaylist(accessToken, playlistId)])
+  ), Promise.resolve([]))
 
-  Promise.all(allPlayPromises)
+  allPlayPromises
   .then((values) => {
-    const tracksNoDup = values.flat().filter((value, index, self) => 
-      self.findIndex(t => t.id === value.id) === index
-    ).filter((value, index, self) =>
+    const tracksNoDup = mergeTracks(values.flat()).filter((value) =>
       value.artists[0].type === 'artist'
     )
     const artistsNoDup = procArtists(tracksNoDup).filter((value, index, self) => 
@@ -122,14 +193,8 @@ const getTracks = (accessToken, playlistIds, setTracks, setArtists, setGenres) =
     setTracks(tracksNoDup)
     setArtists(artistsNoDup)
 
-    const allGenPromises = []
-    const maxPage = Math.floor((artistsNoDup.length - 1) / 50) + 1
-    for (let i = 0; i < maxPage; i++) {
-      allGenPromises.push(fetchGenres(spotifyApi, artistsNoDup.map(itm => (itm.id)).slice(i*50, (i+1)*50)))
-    }
-    Promise.all(allGenPromises)
-    .then((values) => {
-      const flatGenres = values.flat()
+    fetchGenres(accessToken, artistsNoDup.map(itm => (itm.id)))
+    .then((flatGenres) => {
       setGenres(
         flatGenres.map(data => {
           return {
