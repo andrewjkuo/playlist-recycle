@@ -1,24 +1,44 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 import Profile from '../components/Profile'
 import Playlists from '../components/Playlists'
 import Login from '../components/Login'
-
-function getHashParams() {
-  var hashParams = {};
-  var e, r = /([^&;=]+)=?([^&;]*)/g,
-    q = window.location.hash.substring(1);
-  while ((e = r.exec(q))) {
-    hashParams[e[1]] = decodeURIComponent(e[2]);
-  }
-  return hashParams;
-}
+import { exchangeCodeForAccessToken, getStoredAccessToken } from '../services/auth'
 
 const Home = ({ setPlaylistIds, code, setCode }) => {
-  const params = getHashParams()
+  const [authError, setAuthError] = useState()
+
   useEffect(() => {
-    setCode(params.access_token)
-  },[params.access_token, setCode])
+    const completeLogin = async () => {
+      const urlParams = new URLSearchParams(window.location.search)
+      const authCode = urlParams.get('code')
+      const authState = urlParams.get('state')
+      const spotifyError = urlParams.get('error')
+
+      try {
+        if (spotifyError) {
+          throw new Error(spotifyError)
+        }
+
+        if (authCode) {
+          const accessToken = await exchangeCodeForAccessToken(authCode, authState)
+          window.history.replaceState({}, document.title, window.location.pathname)
+          setCode(accessToken)
+          return
+        }
+
+        const storedAccessToken = await getStoredAccessToken()
+        if (storedAccessToken) {
+          setCode(storedAccessToken)
+        }
+      } catch (error) {
+        setAuthError(error.message)
+      }
+    }
+
+    completeLogin()
+  }, [setCode])
+
   if (code) {
     return (
       <div className="page">
@@ -81,6 +101,7 @@ const Home = ({ setPlaylistIds, code, setCode }) => {
         </p>
         <h2>Login</h2>
         <hr></hr>
+        {authError && <p>Spotify login failed: {authError}</p>}
         <p>Please connect to Spotify to continue...</p>
         <Login />
       </div>
